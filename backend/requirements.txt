@@ -10,3 +10,4 @@ openai
 tqdm
 python-dotenv
 groq
+supabase

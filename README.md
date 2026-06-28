@@ -18,6 +18,11 @@ The data source for this application is the publicly available Swiggy Annual Rep
 ## How to Run
 
 ### 1. Setup Environment
+
+**Python Version:** Python 3.9+ is required.
+
+Create and activate a virtual environment:
+
 ```bash
 cd backend
 python -m venv venv
@@ -25,7 +30,10 @@ python -m venv venv
 venv\Scripts\activate
 # Mac/Linux:
 source venv/bin/activate
+```
 
+Install the required dependencies:
+```bash
 pip install -r requirements.txt
 ```
 
@@ -42,18 +50,21 @@ copy backend\.env.example backend\.env
 cp backend/.env.example backend/.env
 ```
 
-Open the new `.env` file and replace the placeholder with your actual Groq API key:
+Open the new `.env` file and populate it with your environment variables:
 ```
-LLM_PROVIDER=groq
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+SUPABASE_BUCKET=documents
+DATABASE_URL=your_postgresql_connection_string
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
 ### 3. Run the Backend API
 ```bash
 cd backend
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
-Ensure your `swiggy_annual_report.pdf` is placed inside the `backend/data/` folder. The backend API will be available at `http://localhost:8000`.
+Ensure your `swiggy_annual_report.pdf` is placed inside the `backend/data/` folder (for the current local testing phase). The backend API will be available at `http://localhost:8000`.
 
 ### 4. Run the Frontend
 You can serve the `frontend/` directory using any local web server, for instance:

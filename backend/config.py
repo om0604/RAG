@@ -11,6 +11,12 @@ class Config:
     INDEX_FILE: str = os.getenv("INDEX_FILE", "faiss_index.index")
     METADATA_FILE: str = os.getenv("METADATA_FILE", "metadata.pkl")
     
+    # Supabase Phase 2 Configuration
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    SUPABASE_BUCKET: str = os.getenv("SUPABASE_BUCKET", "documents")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    
     # Base directory of the backend to resolve paths robustly
     BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))
     DATA_DIR: str = os.path.join(BASE_DIR, "data")
