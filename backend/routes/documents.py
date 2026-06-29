@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
-from typing import List, Dict, Any
 from config import config
 from database import get_supabase
-from storage import upload_file_to_storage
 import io
 import time
+import os
 
 router = APIRouter()
 
@@ -16,19 +15,23 @@ def get_documents():
         response = supabase.table("documents").select("*").order("created_at", desc=True).execute()
         return response.data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        print(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail="An internal error occurred while fetching documents.")
 
 @router.post("/")
-async def upload_document(file: UploadFile = File(...)):
-    """Upload a new PDF document and process it."""
+def upload_document(file: UploadFile = File(...)):
+    """Upload a new PDF document and process it synchronously in a background thread pool."""
     # Lazy imports
     from ingest import process_pdf
     from services.rag_service import build_index
     
-    if not file.filename.lower().endswith(".pdf"):
+    # Sanitize filename
+    safe_filename = os.path.basename(file.filename)
+    
+    if not safe_filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=415, detail="Unsupported file type. Only PDF is allowed.")
         
-    file_bytes = await file.read()
+    file_bytes = file.file.read()
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Empty file uploaded.")
         
@@ -41,12 +44,12 @@ async def upload_document(file: UploadFile = File(...)):
     
     # Generate unique storage path
     timestamp = int(time.time())
-    storage_path = f"reports/{timestamp}_{file.filename}"
+    storage_path = f"reports/{timestamp}_{safe_filename}"
     
     try:
         # 1. Insert initial row into documents table
         doc_insert = supabase.table("documents").insert({
-            "filename": file.filename,
+            "filename": safe_filename,
             "storage_path": storage_path,
             "status": "Processing",
             "size_bytes": size_bytes,
@@ -55,21 +58,20 @@ async def upload_document(file: UploadFile = File(...)):
         
         document_id = doc_insert.data[0]["id"]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create document record: {str(e)}")
+        print(f"Database insert error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create document record.")
 
     try:
         # 2. Upload to Supabase Storage
-        # The upload_file_to_storage currently takes a file_path, we need to adapt or just write temporary file
-        # But wait, storage.py might not accept bytes! We will need to update storage.py to accept bytes.
         from storage import upload_bytes_to_storage
-        upload_bytes_to_storage(file_bytes, storage_path)
+        upload_bytes_to_storage(file_bytes, storage_path, content_type=file.content_type or "application/pdf")
         
         # 3. Extract chunks from bytes
         pdf_stream = io.BytesIO(file_bytes)
         chunks, page_count = process_pdf(pdf_stream)
         
         if not chunks:
-            raise Exception("No readable text found in PDF.")
+            raise ValueError("No readable text found in PDF.")
             
         # 4. Build index
         build_index(chunks, document_id)
@@ -81,15 +83,23 @@ async def upload_document(file: UploadFile = File(...)):
             "chunk_count": len(chunks)
         }).eq("id", document_id).execute()
         
-        return {"id": document_id, "filename": file.filename}
+        return {"id": document_id, "filename": safe_filename}
         
-    except Exception as e:
-        # Rollback: Update status to Failed
+    except ValueError as e:
+        # Specific known errors like "No readable text"
         try:
             supabase.table("documents").update({"status": "Failed"}).eq("id", document_id).execute()
         except:
             pass
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        # Rollback: Update status to Failed
+        print(f"Upload processing error: {e}")
+        try:
+            supabase.table("documents").update({"status": "Failed"}).eq("id", document_id).execute()
+        except:
+            pass
+        raise HTTPException(status_code=500, detail="An internal error occurred during processing.")
 
 
 @router.delete("/{document_id}")
@@ -119,4 +129,5 @@ def delete_document(document_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete document: {str(e)}")
+        print(f"Database delete error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete document.")

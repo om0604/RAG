@@ -33,7 +33,7 @@ def build_index(chunks, document_id: str):
         
     print(f"Saved {len(chunks)} chunks to Supabase pgvector.")
 
-def retrieve(query, top_k=5):
+def retrieve(query: str, document_id: str, top_k: int = 5):
     """Retrieve nearest neighbor chunks via Supabase RPC"""
     supabase = get_supabase()
     
@@ -45,7 +45,8 @@ def retrieve(query, top_k=5):
         {
             "query_embedding": query_embedding,
             "match_threshold": config.SIMILARITY_THRESHOLD,
-            "match_count": top_k
+            "match_count": top_k,
+            "filter_document_id": document_id
         }
     ).execute()
     
