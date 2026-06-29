@@ -20,6 +20,22 @@ def upload_file_to_storage(file_path: str, destination_name: str) -> str:
     public_url = supabase.storage.from_(config.SUPABASE_BUCKET).get_public_url(destination_name)
     return public_url
 
+def upload_bytes_to_storage(file_bytes: bytes, destination_name: str) -> str:
+    """
+    Upload file bytes to Supabase Storage.
+    Returns the public URL of the uploaded file.
+    """
+    supabase = get_supabase()
+    
+    response = supabase.storage.from_(config.SUPABASE_BUCKET).upload(
+        path=destination_name,
+        file=file_bytes,
+        file_options={"upsert": "true"}
+    )
+    
+    public_url = supabase.storage.from_(config.SUPABASE_BUCKET).get_public_url(destination_name)
+    return public_url
+
 def delete_file_from_storage(file_name: str):
     """
     Delete a file from Supabase Storage.

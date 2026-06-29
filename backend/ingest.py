@@ -8,13 +8,19 @@ def clean_text(text: str) -> str:
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
-def process_pdf(pdf_path: str):
-    print(f"Processing PDF: {pdf_path}")
-    if not os.path.exists(pdf_path):
-        print("PDF file not found!")
-        return []
+from typing import Union
+from io import BytesIO
+
+def process_pdf(pdf_source: Union[str, BytesIO]):
+    print("Processing PDF...")
+    if isinstance(pdf_source, str):
+        if not os.path.exists(pdf_source):
+            print("PDF file not found!")
+            return [], 0
+        reader = PdfReader(pdf_source)
+    else:
+        reader = PdfReader(pdf_source)
         
-    reader = PdfReader(pdf_path)
     chunks = []
     
     text_splitter = RecursiveCharacterTextSplitter(
@@ -24,6 +30,7 @@ def process_pdf(pdf_path: str):
     )
 
     chunk_id = 0
+    page_count = len(reader.pages)
     for page_num, page in enumerate(reader.pages):
         text = page.extract_text()
         if not text:
@@ -41,8 +48,8 @@ def process_pdf(pdf_path: str):
             })
             chunk_id += 1
             
-    print(f"Total chunks generated: {len(chunks)}")
-    return chunks
+    print(f"Total chunks generated: {len(chunks)} across {page_count} pages")
+    return chunks, page_count
 
 if __name__ == "__main__":
     import sys
@@ -51,6 +58,6 @@ if __name__ == "__main__":
     else:
         pdf_path = os.path.join(os.path.dirname(__file__), "data", "swiggy_annual_report.pdf")
     
-    chunks = process_pdf(pdf_path)
+    chunks, page_count = process_pdf(pdf_path)
     if chunks:
         print(f"Sample chunk: {chunks[0]}")
