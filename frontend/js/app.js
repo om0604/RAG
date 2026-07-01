@@ -23,10 +23,10 @@ async function loadDocuments() {
 
 function startUploadSimulation(btn) {
     const states = [
-        "Uploading...",
-        "Extracting text...",
-        "Generating embeddings...",
-        "Saving..."
+        "Uploading…",
+        "Extracting text…",
+        "Generating embeddings…",
+        "Indexing…"
     ];
     let i = 0;
     btn.disabled = true;
@@ -127,6 +127,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('chat-send-btn').addEventListener('click', handleSendMessage);
     document.getElementById('chat-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleSendMessage();
+    });
+    
+    document.getElementById('doc-search-input').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.doc-card');
+        cards.forEach(card => {
+            const title = card.querySelector('.doc-title').textContent.toLowerCase();
+            if (title.includes(query)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
     });
     
     document.getElementById('mobile-menu-btn').addEventListener('click', () => {

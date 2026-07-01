@@ -24,25 +24,36 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo">
-                    <i data-lucide="sparkles"></i>
-                    <span>Lumos</span>
+                <div>
+                    <div class="logo">
+                        <i data-lucide="sparkles" style="width: 28px; height: 28px;"></i>
+                        <span style="margin-left: -4px;">Lumos</span>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; margin-left: 36px;">
+                        AI Document Intelligence
+                    </div>
                 </div>
                 
+                <div class="search-box-container">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="doc-search-input" class="doc-search-input" placeholder="Search documents...">
+                </div>
+
                 <input type="file" id="file-upload" accept="application/pdf" style="display: none;">
-                <button id="upload-btn" class="btn btn-primary w-full justify-center">
+                <button id="upload-btn" class="btn btn-primary w-full justify-center shadow-btn">
                     <i data-lucide="plus" id="upload-icon"></i>
                     New Document
                 </button>
             </div>
             
+            <div class="sidebar-section-title">YOUR DOCUMENTS</div>
             <div class="sidebar-content" id="document-list">
                 <!-- Document Cards injected here via ui.js -->
             </div>
             
             <div class="sidebar-footer">
                 <div class="storage-usage">
-                    <i data-lucide="database"></i>
+                    <i data-lucide="cloud" style="width: 14px; height: 14px;"></i>
                     <span>Storage: Healthy</span>
                 </div>
             </div>
@@ -63,11 +74,13 @@
             
             <!-- Empty State -->
             <div id="chat-empty-state" class="empty-state">
-                <div class="empty-state-icon">
-                    <i data-lucide="book-open"></i>
+                <div class="hero-group">
+                    <div class="empty-state-icon">
+                        <i data-lucide="book-open"></i>
+                    </div>
+                    <h1 class="hero-title">Chat with your documents.</h1>
+                    <p class="hero-subtitle">Upload PDFs, search instantly, and get accurate answers with cited sources.</p>
                 </div>
-                <h1 class="hero-title">Chat with your documents.</h1>
-                <p class="hero-subtitle">Upload PDFs, search instantly, and get accurate answers with cited sources.</p>
             </div>
 
             <!-- Chat History -->
@@ -80,7 +93,7 @@
                 <div class="input-wrapper">
                     <input type="text" id="chat-input" class="input-text chat-input" placeholder="Ask a question about this document...">
                     <button id="chat-send-btn" class="chat-send-btn">
-                        <i data-lucide="arrow-right"></i>
+                        <i data-lucide="arrow-up" style="width: 20px; height: 20px;"></i>
                     </button>
                 </div>
             </div>

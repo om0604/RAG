@@ -26,10 +26,17 @@ export function renderDocumentList(onSelect, onDelete) {
     
     if (state.documents.length === 0) {
         container.innerHTML = `
-            <div style="padding: 24px 0; text-align: center; color: var(--text-tertiary); font-size: var(--font-size-sm);">
-                No documents uploaded yet.
+            <div style="padding: 32px 16px; text-align: center; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-tertiary);">
+                    <i data-lucide="file-x" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">No documents yet</div>
+                    <div style="font-size: var(--font-size-xs);">Upload your first PDF to start chatting.</div>
+                </div>
             </div>
         `;
+        if (window.lucide) window.lucide.createIcons();
         return;
     }
     
@@ -85,14 +92,16 @@ export function renderChatHeader() {
     
     if (!doc) {
         headerContent.innerHTML = `
-            <i data-lucide="inbox" style="color: var(--text-tertiary);"></i>
-            <span style="color: var(--text-secondary); font-weight: 500;">No document selected</span>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Document</span>
+                <span style="color: var(--text-secondary); font-weight: 500; font-size: var(--font-size-md);">No document selected</span>
+            </div>
         `;
     } else {
         headerContent.innerHTML = `
-            <i data-lucide="file-text" style="color: var(--text-secondary);"></i>
-            <span style="font-weight: 600; font-size: var(--font-size-lg); color: var(--text-primary);">${escapeHTML(doc.filename)}</span>
-            <span class="badge badge-ready" style="margin-left: 12px;">Ready</span>
+            <i data-lucide="file-text" style="color: var(--accent-primary); width: 24px; height: 24px;"></i>
+            <span style="font-weight: 600; font-size: var(--font-size-lg); color: var(--text-primary); letter-spacing: -0.01em;">${escapeHTML(doc.filename)}</span>
+            <span class="badge badge-ready" style="margin-left: 12px; background-color: transparent;">Ready</span>
         `;
     }
     
